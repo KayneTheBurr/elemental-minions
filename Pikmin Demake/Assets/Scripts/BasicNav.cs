@@ -5,17 +5,20 @@ using UnityEngine.AI;
 
 public enum GroundType { Grass, Fire, Water, Electric}
 public enum MinionType { Fire, Water, Electric}
+public enum MinionState { Idle, Active, Carrying, TryingToCarry, NavToTreasure}
 
 
 public class BasicNav : MonoBehaviour
 {
+    
     public Transform target;
     public NavMeshAgent agent;
     public int currentMask;
+    public MinionState myState;
     public GroundType groundType;
     public MinionType myElement;
     public CameraTargeter camTarget;
-    public GameObject myRing;
+    public GameObject myRing, redRing, greenRing;
 
 
     // Start is called before the first frame update
@@ -24,24 +27,30 @@ public class BasicNav : MonoBehaviour
         camTarget = FindObjectOfType<CameraTargeter>();
         agent = this.GetComponent<NavMeshAgent>();
         
+        
     }
 
     // Update is called once per frame
     void Update()
     {
-        
         CheckFloorType();
+        AtLocationCheck();
 
         if (groundType == GroundType.Electric)
         {
-            agent.speed = 5f;
-
+            agent.speed = 15f;
+            agent.acceleration = 20;
         }
-        else {agent.speed = 3.5f; }
+        else { agent.speed = 8f;  agent.acceleration = 12f; }
 
-        AtLocationCheck();
+        if(myState == MinionState.NavToTreasure)
+        {
+            if(agent.isStopped || agent.isPathStale)
+            {
+                myState = MinionState.Idle;
+            }
+        }
 
-        
     }
     public void AtLocationCheck()
     {
@@ -57,15 +66,44 @@ public class BasicNav : MonoBehaviour
     public void DeselectMinion()
     {
         myRing.SetActive(false);
+        if(myState != MinionState.NavToTreasure)
+        {
+            myState = MinionState.Idle;
+        }
+        
     }
     public void SelectMinion()
     {
+        
         myRing.SetActive(true);
+        myState = MinionState.Active;
     }
     public void SelectMinionTarget(Vector3 targetPos, Transform targetLocation)
     {
         target = targetLocation;
+        target.gameObject.SetActive(true);
         agent.SetDestination(targetPos);
+    }
+    public void TryToCarry()
+    {
+        target.gameObject.SetActive(false);
+        myRing.SetActive(false);
+        redRing.SetActive(true);
+        myState = MinionState.TryingToCarry;
+        if(camTarget.selectedMinion == this)
+        {
+            camTarget.selectedMinion = null;
+        }
+    }
+    public void Carrying()
+    {
+        target.gameObject.SetActive(false);
+        myRing.SetActive(false);
+        redRing.SetActive(false);
+        greenRing.SetActive(true);
+        camTarget.selectedMinion = null;
+        myState = MinionState.Carrying;
+
     }
     
 

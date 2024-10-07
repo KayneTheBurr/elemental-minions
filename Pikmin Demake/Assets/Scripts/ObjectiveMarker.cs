@@ -4,23 +4,15 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public enum ObjectiveType { Fire, Water, Electric, Total}
+public enum ObjectiveType { Fire, Water, Electric, Total, Treasures}
 public class ObjectiveMarker : MonoBehaviour
 {
     public TextMeshProUGUI objectiveText;
     public ObjectiveType objective;
     public bool objectiveMet = false, winCircle = false;
-    public int fireNeeded, waterNeeded, elecNeeded, totalNeeded;
-    public int fireMinionsHere, waterMinionsHere, elecMinionsHere, totalMinionsHere;
+    public int fireNeeded, waterNeeded, elecNeeded, totalNeeded, treasuresNeeded;
+    public int fireMinionsHere, waterMinionsHere, elecMinionsHere, totalMinionsHere, treasuresHere;
 
-
-    
-    void Start()
-    {
-        
-    }
-
-    
     void Update()
     {
         //update the objective text based on objective type and if final win circle
@@ -44,6 +36,10 @@ public class ObjectiveMarker : MonoBehaviour
                     objectiveText.color = Color.black;
                     objectiveText.text = "WIN \n" + totalMinionsHere + " / " + totalNeeded + " Total \n";
                     break;
+                case ObjectiveType.Treasures:
+                    objectiveText.color = Color.black;
+                    objectiveText.text = "WIN \n" + treasuresHere + " / " + treasuresNeeded + " Treasures \n";
+                    break;
             }
         }
         else if(!winCircle)
@@ -65,6 +61,10 @@ public class ObjectiveMarker : MonoBehaviour
                 case ObjectiveType.Total:
                     objectiveText.color = Color.black;
                     objectiveText.text = totalMinionsHere + " / " + totalNeeded + " Total \n";
+                    break;
+                case ObjectiveType.Treasures:
+                    objectiveText.color = Color.black;
+                    objectiveText.text = treasuresHere + " / " + treasuresNeeded + " Treasures \n";
                     break;
             }
         }
@@ -116,6 +116,16 @@ public class ObjectiveMarker : MonoBehaviour
                     objectiveMet = false;
                 }
                 break;
+            case ObjectiveType.Treasures:
+                if(treasuresHere >= treasuresNeeded)
+                {
+                    objectiveMet = true;
+                }
+                else if(treasuresHere < treasuresNeeded)
+                {
+                    objectiveMet = false;
+                }
+                break;
         }
     }
     //add to total and appropriate number when entering circle
@@ -139,6 +149,21 @@ public class ObjectiveMarker : MonoBehaviour
                     break;
             }
         }
+        if(col.gameObject.GetComponent<TreasureLogic>() == true)
+        {
+
+            TreasureLogic collector = col.gameObject.GetComponent<TreasureLogic>();
+            treasuresHere++;
+            if(objective == ObjectiveType.Treasures)
+            {
+                collector.FreeMinions();
+            }
+            if(treasuresHere <= treasuresNeeded)
+            {
+                Destroy(col.gameObject);
+            }
+            
+        }
         ObjectiveMet();
             
     }
@@ -161,6 +186,11 @@ public class ObjectiveMarker : MonoBehaviour
                     elecMinionsHere--;
                     break;
             }
+        }
+        if (col.gameObject.GetComponent<TreasureLogic>() == true)
+        {
+            TreasureLogic collector = col.gameObject.GetComponent<TreasureLogic>();
+            treasuresHere--;
         }
         ObjectiveMet();
     }

@@ -22,13 +22,7 @@ public class WinLevel : MonoBehaviour
 
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.R))
-        {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        }
-
-
-
+        
         if(winYet == winObjective.objectiveMet && checkWin == true)
         {
             
@@ -38,7 +32,15 @@ public class WinLevel : MonoBehaviour
             checkWin = false;
             DisplayWinAndNext();
         }
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            RestartScene();
+        }
 
+    }
+    public void RestartScene()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
     public void DisplayWinAndNext()
     {
@@ -47,7 +49,7 @@ public class WinLevel : MonoBehaviour
 
     public void LoadNextLevel()
     {
-        if(SceneManager.GetActiveScene().buildIndex + 1 <= SceneManager.loadedSceneCount)
+        if(SceneManager.GetActiveScene().buildIndex + 1 <= SceneManager.loadedSceneCount +1)
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
         }
